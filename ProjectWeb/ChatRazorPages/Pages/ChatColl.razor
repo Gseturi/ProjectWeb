@@ -1,0 +1,81 @@
+﻿@page "/Chats"
+@namespace ProjectWeb.ChatRazorPages
+@attribute [Authorize]
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.SignalR.Client
+@using ProjectWeb.Data
+@using ProjectWeb.ChatRazorPages
+
+@inject NavigationManager NavManager
+@using static ProjectWeb.Data.UserModel
+@inject ApplicationDbContext context
+@inject ChatAppDbContext Chatcontext
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> _UserManager
+@inject IHttpContextAccessor HttpContextt
+
+<h3>ChatColl</h3>
+
+@if (Group.Count == 0)
+{
+    <p>You don't have any chats open.</p>
+}
+else
+{
+    @foreach (UserModel.Chat chat in Group)
+    {
+        <p>@chat.Name</p>
+    }
+}
+
+<CascadingValue Value="Group" Name="_group">
+    
+    <GroupChatLIst></GroupChatLIst>
+  
+</CascadingValue>
+
+<FIndAddSelectFriend UserName="_User"></FIndAddSelectFriend>
+
+@code {
+
+    [CascadingParameter]
+    private HttpContext _HttpContext { get; set; }
+
+    private HubConnection hub;
+
+    private ApplicationUser _User { get; set; } = new();
+    private List<string>? ChatId { get; set; }
+
+    private bool Friend = false;
+
+    private List<UserModel.ChatMemeber> GroupsIds { get; set; } = new();
+    private List<UserModel.Chat> Group { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _HttpContext = HttpContextt.HttpContext;
+        await base.OnInitializedAsync();
+
+        _User = await _UserManager.GetUserAsync(_HttpContext.User);
+
+        hub = new HubConnectionBuilder()
+         .WithUrl(NavManager.ToAbsoluteUri("/HubEntry"))
+         .WithAutomaticReconnect()
+         .Build();
+
+        GroupsIds = Chatcontext.chatMemebers.Where(p => p.Id == _User.Id).ToList();
+        foreach (UserModel.ChatMemeber member in GroupsIds)
+        {
+            var matchingChats = Chatcontext.Chats.Where(p => p.ChatId == member.ChatId);
+            Group.AddRange(matchingChats);
+        }
+        Friend = GroupsIds.Count() > 0;
+
+      
+
+    }
+
+}

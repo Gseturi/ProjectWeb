@@ -1,0 +1,41 @@
+﻿@namespace ProjectWeb.ChatRazorPages
+
+@using ProjectWeb.Data
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using static ProjectWeb.Data.UserModel
+
+
+
+raime unda daiweros
+<div class="nav-scrollable">
+    <nav class="flex-column">
+        @foreach (UserModel.Chat chat in Group)
+        {
+            <div class="nav-item px-3">
+                <button name="@chat.Name" @onclick="() => OpenChat(chat.ChatId)">@chat.Name</button>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+
+    [CascadingParameter(Name = "_group")]
+    private List<UserModel.Chat> Group { get; set; } = new();
+
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+    }
+
+    private void OpenChat(string chatId)
+    {
+        // Your logic to open chat goes here
+    }
+
+}
+

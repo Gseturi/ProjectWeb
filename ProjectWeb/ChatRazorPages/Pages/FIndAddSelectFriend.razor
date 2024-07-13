@@ -1,0 +1,35 @@
+﻿@namespace ProjectWeb.ChatRazorPages
+@using Microsoft.AspNetCore.Identity
+@using ProjectWeb.Data
+@inject UserManager<ApplicationUser> _UserManager
+@inject ChatAppDbContext context;
+@rendermode InteractiveServer
+@FoundOrNot
+@UserName.UserName
+<InputText DisplayName="Input Name of a USer" @bind-Value="NameofFriend"></InputText>
+<button @onclick="Find">Find</button>
+
+
+@code {
+    [Parameter]
+    public ApplicationUser UserName { get; set; } = new();
+
+    public String FoundOrNot = " ";
+
+    private string NameofFriend;
+
+    public void Find()
+    {
+        var Chat = context.Chats.Where(p => p.Name == NameofFriend);
+        if (Chat==null)
+        {
+            FoundOrNot = "NOT FOUND";
+        }
+        else
+        {
+            FoundOrNot = "Found";
+        }
+
+    }
+
+}
